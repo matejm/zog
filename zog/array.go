@@ -1,5 +1,7 @@
 package zog
 
+import "reflect"
+
 type arraySchema[T any] struct {
 	checks []func([]T) error
 	// child schema
@@ -12,20 +14,30 @@ func Array[T any](schema SchemaDefinition[T]) *arraySchema[T] {
 	}
 }
 
+func isArray(data any) bool {
+	t := reflect.TypeOf(data)
+	return t.Kind() == reflect.Array || t.Kind() == reflect.Slice
+}
+
 func (s *arraySchema[T]) Parse(data any) ([]T, error) {
-	v, ok := data.([]interface{})
-	if !ok {
-		return nil, ErrInvalidType(data, "[]any")
+	// check if this is an array
+	// (simply cast to .([]interface{}) is not enough as it will fail for specific arrays like []int)
+	if !isArray(data) {
+		return nil, ErrInvalidType(data, "[]")
 	}
 
 	// parse recursively
-	res := make([]T, len(v))
-	for i, item := range v {
-		item, err := s.schema.Parse(item)
+	len := reflect.ValueOf(data).Len()
+	res := make([]T, len)
+	for i := 0; i < len; i++ {
+		item := reflect.ValueOf(data).Index(i).Interface()
+
+		parsedItem, err := s.schema.Parse(item)
 		if err != nil {
 			return nil, ErrInArray(i, err)
 		}
-		res[i] = item
+
+		res[i] = parsedItem
 	}
 
 	// could've done checks before, but here is easier because of type inference

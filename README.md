@@ -7,9 +7,9 @@ Schema validation for Go, heavily inspired by [Zod](https://github.com/colinhack
 Validate if all object fields are present, correct type and match the schema.
 
 ```go
-var schema = zog.Object[map[string]any](map[string]any{
+var schema = zog.Map().Fields(map[string]any{
 	"Name": zog.String().NonEmpty(),
-	"Age":  zog.Int().Min(0).Max(100),
+	"Age":  zog.Int().Gte(0).Lte(100),
 })
 
 _, err := schema.Parse(map[string]any{
@@ -39,21 +39,25 @@ type User struct {
 	Age  int
 }
 
-var schema = zog.Object[User](map[string]any{
+var schema = zog.Object[User]().Fields(map[string]any{
 	"Name": zog.String().NonEmpty(),
 	"Age":  zog.Int().Gte(0).Lte(100),
 })
+// or alternatively, to avoid map[string]any
+var schema = zog.Object[User]()
+	.AddField("Name", zog.String().NonEmpty())
+	.AddField("Age", zog.Int().Min(0).Max(100))
 
 user, err := schema.Parse(map[string]any{
 	"Name": "John",
 	"Age":  18,
 })
-// user is now of type User
+// output user is now of type User
 ```
 
 ## Roadmap
 
-- Add optional fields
+- Add optional fields and refine
 - Add more validations (e.g. email, url)
 - Add more types (e.g. date, support for int8, ...)
 - Add code generation for custom types (if it is possible to infer the type from the schema)

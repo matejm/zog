@@ -5,9 +5,7 @@ type intSchema struct {
 }
 
 func Int() *intSchema {
-	return &intSchema{
-		checks: []func(int) error{},
-	}
+	return &intSchema{}
 }
 
 func (s *intSchema) Parse(data any) (int, error) {

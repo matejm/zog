@@ -12,7 +12,7 @@ func ErrInvalidType(got any, expected string) error {
 	return fmt.Errorf("invalid type, got %T, expected %s", got, expected)
 }
 
-func ErrExact[T constraints.Ordered](got, exact T) error {
+func ErrExact[T any](got, exact T) error {
 	return fmt.Errorf("expected %v, got %v", exact, got)
 }
 

@@ -13,17 +13,21 @@ func main() {
 		Age  int
 	}
 
-	var schema = zog.Array(zog.Object[User](map[string]any{
+	var schema = zog.Array(zog.Object[User]().Fields(map[string]any{
 		"Name": zog.String().NonEmpty(),
 		"Age":  zog.Int().Gte(0).Lte(100),
 	})).Min(1)
 
 	users, err := schema.Parse([]map[string]any{{
 		"Name": "John",
-		"Age":  12,
+		"Age":  20,
+	}, {
+		"Name": "Jane",
+		"Age":  25,
 	}})
+
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	fmt.Println(users)
