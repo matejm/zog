@@ -1,7 +1,6 @@
 package zog_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/matejm/zog/zog"
@@ -128,8 +127,6 @@ func (t *ObjectTestSuite) TestFieldExtensions() {
 
 	// override with addField
 	schema = initialSchema.AddField("foo", zog.Bool())
-
-	fmt.Printf("schema = %+v\n", schema)
 
 	v, err = schema.Parse(map[string]interface{}{"foo": true, "bar": 3})
 	t.Equal(map[string]interface{}{"foo": true, "bar": 3}, v)

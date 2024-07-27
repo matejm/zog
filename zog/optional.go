@@ -5,6 +5,7 @@ import (
 )
 
 type optionalSchema[T any] struct {
+	checks []func(*T) error
 	// child schema
 	schema SchemaDefinition[T]
 }
@@ -57,5 +58,5 @@ func (s *optionalSchema[T]) Parse(data any) (*T, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &parsed, nil
+	return &parsed, check(&parsed, s.checks)
 }

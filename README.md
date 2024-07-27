@@ -2,25 +2,32 @@
 
 Schema validation for Go, heavily inspired by [Zod](https://github.com/colinhacks/zod).
 
-## Object validation
+## Basic usage
 
 Validate if all object fields are present, correct type and match the schema.
 
 ```go
-var schema = zog.Map().Fields(map[string]any{
+// create a new schema
+var schema = zog.String().NonEmpty().Max(255).Regex("^[a-zA-Z0-9]+$")
+
+// parse a value from any type
+value, err := schema.Parse("John")
+```
+
+More complex schema example:
+
+```go
+var usersSchema = zog.Map().Fields(map[string]any{
 	"Name": zog.String().NonEmpty(),
 	"Age":  zog.Int().Gte(0).Lte(100),
-})
-
-_, err := schema.Parse(map[string]any{
-	"Name": "John",
-	"Age":  "18",
+	"Permissions": zog.Array(zog.String()).NonEmpty(),
+	"PhoneNumber": zog.String().Regex("^[0-9]{10}$").Max(10).Optional(),
 })
 ```
 
-## Casting and parsing any type
+## Type inference
 
-Zog can be used to parse any type. Build in types like `string`, `int`, `float64` and `bool`, as well as `map[string]any` and `[]any` are supported.
+Go typing system is not nearly as capable as TypeScript, so Zog is unable to match the Zod's type inference. However, type inference is still present for all the built-in types such as `string`, `int`, `bool`, maps and arrays of any type.
 
 ```go
 var matrixSchema = zog.Array(zog.Array(zog.Int()))
@@ -28,36 +35,60 @@ var matrixSchema = zog.Array(zog.Array(zog.Int()))
 var unknownType any = []any{[]any{1, 2, 3}, []any{4, 5, 6}}
 
 matrix, err := matrixSchema.Parse(unknownType)
-// matrix is now automatically cast to [][]int
+// matrix type is inferred to be [][]int
+
+var optionalSchema = zog.String().NonEmpty().Optional()
+
+value, err := optionalSchema.Parse("John")
+// value type is inferred to be *string
 ```
 
-Zog also supports casting to custom structs, using the `zog.Object` function.
+In case of object schemas, Zog currently provides two options. You can either use `map[string]any` or types defined by your own structs. In the future, we might add support for code generation to automatically create structs from the schema.
+
+### 1. use `zog.Map` to get a `map[string]any` schema
 
 ```go
-type User struct {
-	Name string
-	Age  int
-}
-
-var schema = zog.Object[User]().Fields(map[string]any{
+var schema = zog.Map().Fields(map[string]any{
 	"Name": zog.String().NonEmpty(),
 	"Age":  zog.Int().Gte(0).Lte(100),
 })
-// or alternatively, to avoid map[string]any
-var schema = zog.Object[User]()
-	.AddField("Name", zog.String().NonEmpty())
-	.AddField("Age", zog.Int().Min(0).Max(100))
 
 user, err := schema.Parse(map[string]any{
 	"Name": "John",
 	"Age":  18,
 })
-// output user is now of type User
+// user type is inferred to be map[string]any
 ```
 
-## Roadmap
+### 2. use `zog.Object` to get a custom struct schema
 
-- Add optional fields and refine
+```go
+// define a custom struct
+type User struct {
+	Name string
+	Age  int
+}
+
+// pass the struct to the Object function
+var schema = zog.Object[User]().Fields(map[string]any{
+	"Name": zog.String().NonEmpty(),
+	"Age":  zog.Int().Gte(0).Lte(100),
+})
+// or alternatively, to avoid writing map[string]any
+var schema = zog.Object[User]()
+	.AddField("Name", zog.String().NonEmpty())
+	.AddField("Age", zog.Int().Gte(0).Lte(100))
+
+user, err := schema.Parse(map[string]any{
+	"Name": "John",
+	"Age":  18,
+})
+// user type is inferred to be User
+```
+
+## Future plans
+
+- Add more useful types (e.g. float, enum, date, ...)
 - Add more validations (e.g. email, url)
-- Add more types (e.g. date, support for int8, ...)
+- Check if it is possible to infer more types from the schema
 - Add code generation for custom types (if it is possible to infer the type from the schema)

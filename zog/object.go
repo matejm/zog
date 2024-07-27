@@ -6,6 +6,7 @@ import (
 )
 
 type objectSchema[T any] struct {
+	checks []func(T) error
 	// schema map for children
 	schemas map[string]any
 }
@@ -133,5 +134,5 @@ func (s *objectSchema[T]) Parse(data any) (T, error) {
 
 	// Return the populated struct
 	result := res.Interface().(T)
-	return result, nil
+	return result, check(result, s.checks)
 }

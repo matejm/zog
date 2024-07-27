@@ -7,28 +7,21 @@ import (
 )
 
 func main() {
-	// Parse a list of users
+	// define a custom struct
 	type User struct {
 		Name string
 		Age  int
 	}
 
-	var schema = zog.Array(zog.Object[User]().Fields(map[string]any{
-		"Name": zog.String().NonEmpty(),
-		"Age":  zog.Int().Gte(0).Lte(100),
-	})).Min(1)
+	// or alternatively, to avoid writing map[string]any
+	var schema = zog.Object[User]().AddField("Name", zog.String().NonEmpty()).AddField("Age", zog.Int().Gt(0).Lt(100))
 
-	users, err := schema.Parse([]map[string]any{{
+	user, err := schema.Parse(map[string]any{
 		"Name": "John",
-		"Age":  20,
-	}, {
-		"Name": "Jane",
-		"Age":  25,
-	}})
+		"Age":  18,
+	})
+	// user type is inferred to be User
 
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println(users)
+	fmt.Println(user)
+	fmt.Println(err)
 }
