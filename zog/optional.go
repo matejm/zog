@@ -60,6 +60,10 @@ func (s *aggregationSchema) Optional() *optionalSchema[any] {
 	return Optional(s)
 }
 
+func (s *anySchema) Optional() *optionalSchema[any] {
+	return Optional(s)
+}
+
 func (s *optionalSchema[T]) Parse(data any) (*T, error) {
 	if data == nil {
 		return nil, nil

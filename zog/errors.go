@@ -34,6 +34,14 @@ func ErrRegex(got, regex string) error {
 	return fmt.Errorf("regex failed, got %s, regex %s", got, regex)
 }
 
+func ErrInvalidEmail(got string, err error) error {
+	return fmt.Errorf("invalid email, got %s: %w", got, err)
+}
+
+func ErrInvalidURL(got string, err error) error {
+	return fmt.Errorf("invalid URL, got %s: %w", got, err)
+}
+
 // int errors
 
 func ErrTooSmall[T constraints.Ordered](got, min T, equalWasAllowed bool) error {
@@ -89,4 +97,10 @@ func ErrNotEvenOneMatch(nOfOptions int) error {
 
 func ErrNotAllMatch(index int, err error) error {
 	return fmt.Errorf("one of the options did not match, index %d: %w", index, err)
+}
+
+// any errors
+
+func ErrNotNil() error {
+	return fmt.Errorf("expected non-nil value")
 }

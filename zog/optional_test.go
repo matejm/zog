@@ -154,6 +154,18 @@ func (t *OptionalTestSuite) TestMatchAll() {
 	t.Nil(err)
 }
 
+func (t *OptionalTestSuite) TestAnyOptional() {
+	schema := zog.Any().NotNil().Optional()
+
+	v, err := schema.Parse(1)
+	t.Equal(1, *v)
+	t.Nil(err)
+
+	v, err = schema.Parse(nil)
+	t.Nil(v)
+	t.Nil(err)
+}
+
 func TestOptionalSuite(t *testing.T) {
 	suite.Run(t, new(OptionalTestSuite))
 }

@@ -222,6 +222,22 @@ func (t *CheckTestSuite) TestMatchAll() {
 	t.Error(err)
 }
 
+func (t *CheckTestSuite) TestAnyCheck() {
+	schema := zog.Any().Check(func(v any) error {
+		if v.(int) < 0 {
+			return zog.ErrExact(v, 0)
+		}
+		return nil
+	})
+
+	v, err := schema.Parse(0)
+	t.Equal(0, v)
+	t.Nil(err)
+
+	_, err = schema.Parse(-1)
+	t.Error(err)
+}
+
 func TestCheckSuite(t *testing.T) {
 	suite.Run(t, new(CheckTestSuite))
 }

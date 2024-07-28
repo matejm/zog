@@ -57,3 +57,7 @@ func (s *pipeSchema[T, U]) ParseJSON(data []byte) (U, error) {
 func (s *aggregationSchema) ParseJSON(data []byte) (any, error) {
 	return ParseJSON(s, data)
 }
+
+func (s *anySchema) ParseJSON(data []byte) (any, error) {
+	return ParseJSON(s, data)
+}

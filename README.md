@@ -120,7 +120,7 @@ user, err := schema.Parse(map[string]any{
 
 ## Future plans
 
-- Add more useful types (e.g. date, cast, ...)
-- Add more validations (e.g. email, url)
+- Add more useful types (e.g. date, ...)
 - Check if it is possible to infer more types from the schema
+- Improve README and add documentation
 - Add code generation for custom types (if it is possible to infer the type from the schema)

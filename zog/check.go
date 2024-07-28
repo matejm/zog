@@ -51,3 +51,8 @@ func (s *aggregationSchema) Check(check func(any) error) *aggregationSchema {
 	s.checks = append(s.checks, check)
 	return s
 }
+
+func (s *anySchema) Check(check func(any) error) *anySchema {
+	s.checks = append(s.checks, check)
+	return s
+}

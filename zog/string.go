@@ -1,6 +1,10 @@
 package zog
 
-import "regexp"
+import (
+	"net/mail"
+	"net/url"
+	"regexp"
+)
 
 type stringSchema struct {
 	checks []func(string) error
@@ -59,6 +63,28 @@ func (s *stringSchema) Regex(regex string) *stringSchema {
 			return ErrRegex(v, regex)
 		}
 		return nil
+	})
+	return s
+}
+
+func (s *stringSchema) Email() *stringSchema {
+	s.checks = append(s.checks, func(v string) error {
+		_, err := mail.ParseAddress(v)
+		if err != nil {
+			return ErrInvalidEmail(v, err)
+		}
+		return nil
+	})
+	return s
+}
+
+func (s *stringSchema) URL() *stringSchema {
+	s.checks = append(s.checks, func(v string) error {
+		u, err := url.Parse(v)
+		if err != nil || u.Scheme == "" || u.Host == "" {
+			return ErrInvalidURL(v, err)
+		}
+		return err
 	})
 	return s
 }
