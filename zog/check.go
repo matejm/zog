@@ -36,3 +36,8 @@ func (s *pipeSchema[T, U]) Check(check func(U) error) *pipeSchema[T, U] {
 	s.checks = append(s.checks, check)
 	return s
 }
+
+func (s *oneOfSchema[T]) Check(check func(T) error) *oneOfSchema[T] {
+	s.checks = append(s.checks, check)
+	return s
+}

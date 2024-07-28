@@ -80,6 +80,18 @@ func (t *OptionalTestSuite) TestPipe() {
 	t.Nil(err)
 }
 
+func (t *OptionalTestSuite) TestOneOf() {
+	schema := zog.OneOf("a", "b").Optional()
+
+	v, err := schema.Parse("a")
+	t.Equal("a", *v)
+	t.Nil(err)
+
+	v, err = schema.Parse(nil)
+	t.Nil(v)
+	t.Nil(err)
+}
+
 func TestOptionalSuite(t *testing.T) {
 	suite.Run(t, new(OptionalTestSuite))
 }

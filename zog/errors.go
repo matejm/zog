@@ -70,3 +70,9 @@ func ErrInvalidSchema(name string) error {
 func ErrMissingField(field string) error {
 	return fmt.Errorf("missing field %s", field)
 }
+
+// oneOf errors
+
+func ErrNoOneOf(got any) error {
+	return fmt.Errorf("no oneOf matched, got %v", got)
+}

@@ -131,6 +131,22 @@ func (t *CheckTestSuite) TestPipe() {
 	t.Error(err)
 }
 
+func (t *CheckTestSuite) TestOneOf() {
+	schema := zog.OneOf(1, 2, 3).Check(func(v int) error {
+		if v >= 2 {
+			return nil
+		}
+		return errors.New("invalid")
+	})
+
+	v, err := schema.Parse(2)
+	t.Equal(2, v)
+	t.Nil(err)
+
+	_, err = schema.Parse(1)
+	t.Error(err)
+}
+
 func TestCheckSuite(t *testing.T) {
 	suite.Run(t, new(CheckTestSuite))
 }

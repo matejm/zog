@@ -20,7 +20,9 @@ More complex schema example:
 var usersSchema = zog.Map().Fields(map[string]any{
 	"Name": zog.String().NonEmpty(),
 	"Age":  zog.Int().Gte(0).Lte(100),
-	"Permissions": zog.Array(zog.String()).NonEmpty(),
+	"Permissions": zog.Array(zog.OneOf(
+		"read", "write", "admin",
+	)).NonEmpty(),
 	"PhoneNumber": zog.String().Regex("^[0-9]{10}$").Max(10).Optional(),
 })
 ```
@@ -97,7 +99,7 @@ user, err := schema.Parse(map[string]any{
 
 ## Future plans
 
-- Add more useful types (e.g. float, enum, date, ...)
+- Add more useful types (e.g. float, date, pipe one schema to another, ...)
 - Add more validations (e.g. email, url)
 - Check if it is possible to infer more types from the schema
 - Add code generation for custom types (if it is possible to infer the type from the schema)
