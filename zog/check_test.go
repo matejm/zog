@@ -43,6 +43,21 @@ func (t *CheckTestSuite) TestInt() {
 	t.Error(err)
 }
 
+func (t *CheckTestSuite) TestFloat() {
+	schemaFloat := zog.Float().Check(func(v float64) error {
+		if v > 0 {
+			return nil
+		}
+		return errors.New("invalid")
+	})
+	v, err := schemaFloat.Parse(1.5)
+	t.Equal(1.5, v)
+	t.Nil(err)
+
+	_, err = schemaFloat.Parse(0.0)
+	t.Error(err)
+}
+
 func (t *CheckTestSuite) TestString() {
 	schemaString := zog.String().Check(func(v string) error {
 		if len(v) > 0 {
@@ -110,8 +125,8 @@ func (t *CheckTestSuite) TestOptional() {
 	t.Error(err)
 }
 
-func (t *CheckTestSuite) TestPipe() {
-	schema := zog.Pipe(
+func (t *CheckTestSuite) TestTransform() {
+	schema := zog.Transform(
 		zog.String(),
 		func(s string, err error) (string, error) {
 			return s + "!", err
@@ -144,6 +159,66 @@ func (t *CheckTestSuite) TestOneOf() {
 	t.Nil(err)
 
 	_, err = schema.Parse(1)
+	t.Error(err)
+}
+
+func (t *CheckTestSuite) TestPipe() {
+	schema := zog.Pipe(
+		zog.Int().Gt(1).Lt(10),
+		zog.OneOf(1, 2, 3),
+	)
+
+	// first schema fails
+	_, err := schema.Parse(1)
+	t.Error(err)
+
+	// second schema fails
+	_, err = schema.Parse(4)
+	t.Error(err)
+
+	// both schemas pass
+	v, err := schema.Parse(2)
+	t.Equal(2, v)
+	t.Nil(err)
+}
+
+func (t *CheckTestSuite) TestMatchAny() {
+	schema := zog.MatchAny(
+		zog.Int().Gte(1),
+		zog.OneOf(-10),
+	).Check(func(v any) error {
+		if v.(int) >= 2 {
+			return nil
+		}
+		return errors.New("invalid")
+	})
+
+	v, err := schema.Parse(3)
+	t.Equal(3, v)
+	t.Nil(err)
+
+	// doesn't match anymore because of the check
+	_, err = schema.Parse(-10)
+	t.Error(err)
+}
+
+func (t *CheckTestSuite) TestMatchAll() {
+	schema := zog.MatchAll(
+		zog.Int().Lt(1),
+		zog.OneOf(-10, -20),
+	).Check(func(v any) error {
+		if v != -10 {
+			return nil
+		}
+		return errors.New("invalid")
+	})
+
+	v, err := schema.Parse(-20)
+	t.Equal(-20, v)
+	t.Nil(err)
+
+	// doesn't match anymore because of the check
+	_, err = schema.Parse(-10)
 	t.Error(err)
 }
 

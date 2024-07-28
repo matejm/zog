@@ -42,7 +42,7 @@ func (t *OptionalTestSuite) TestValid() {
 	t.Nil(err)
 }
 
-func (t *OptionalTestSuite) TestChained() {
+func (t *OptionalTestSuite) TestBasicTypes() {
 	schema := zog.String().Optional()
 	v, err := schema.Parse("a")
 	t.Equal("a", *v)
@@ -62,8 +62,20 @@ func (t *OptionalTestSuite) TestChained() {
 	t.Nil(err)
 }
 
-func (t *OptionalTestSuite) TestPipe() {
-	schema := zog.Pipe(
+func (t *OptionalTestSuite) TestObject() {
+	schema := zog.Object[map[string]int]().AddField("foo", zog.Int()).Optional()
+
+	v, err := schema.Parse(map[string]interface{}{"foo": 3})
+	t.Equal(map[string]int{"foo": 3}, *v)
+	t.Nil(err)
+
+	v, err = schema.Parse(nil)
+	t.Nil(v)
+	t.Nil(err)
+}
+
+func (t *OptionalTestSuite) TestTransform() {
+	schema := zog.Transform(
 		zog.String().NonEmpty(),
 		func(s string, err error) (string, error) {
 			// ignore error
@@ -85,6 +97,56 @@ func (t *OptionalTestSuite) TestOneOf() {
 
 	v, err := schema.Parse("a")
 	t.Equal("a", *v)
+	t.Nil(err)
+
+	v, err = schema.Parse(nil)
+	t.Nil(v)
+	t.Nil(err)
+}
+
+func (t *OptionalTestSuite) TestPipe() {
+	schema := zog.Pipe(zog.String(), zog.OneOf("a", "b")).Optional()
+
+	v, err := schema.Parse("a")
+	t.Equal("a", *v)
+	t.Nil(err)
+
+	v, err = schema.Parse(nil)
+	t.Nil(v)
+	t.Nil(err)
+}
+
+func (t *OptionalTestSuite) TestMatchAny() {
+	schema := zog.MatchAny(
+		zog.Int().Gt(1),
+		zog.OneOf(-10),
+	).Optional()
+
+	v, err := schema.Parse(3)
+	t.Equal(3, *v)
+	t.Nil(err)
+
+	v, err = schema.Parse(-10)
+	t.Equal(-10, *v)
+	t.Nil(err)
+
+	v, err = schema.Parse(nil)
+	t.Nil(v)
+	t.Nil(err)
+}
+
+func (t *OptionalTestSuite) TestMatchAll() {
+	schema := zog.MatchAll(
+		zog.Int().Lt(1),
+		zog.OneOf(-10, -20),
+	).Optional()
+
+	v, err := schema.Parse(-20)
+	t.Equal(-20, *v)
+	t.Nil(err)
+
+	v, err = schema.Parse(-10)
+	t.Equal(-10, *v)
 	t.Nil(err)
 
 	v, err = schema.Parse(nil)

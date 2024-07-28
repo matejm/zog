@@ -28,7 +28,7 @@ func (s *boolSchema) Optional() *optionalSchema[bool] {
 	return Optional(s)
 }
 
-func (s *intSchema) Optional() *optionalSchema[int] {
+func (s *numberSchema[T]) Optional() *optionalSchema[T] {
 	return Optional(s)
 }
 
@@ -44,11 +44,19 @@ func (s *arraySchema[T]) Optional() *optionalSchema[[]T] {
 	return Optional(s)
 }
 
-func (s *pipeSchema[T, U]) Optional() *optionalSchema[U] {
+func (s *transformSchema[T, U]) Optional() *optionalSchema[U] {
 	return Optional(s)
 }
 
 func (s *oneOfSchema[T]) Optional() *optionalSchema[T] {
+	return Optional(s)
+}
+
+func (s *pipeSchema[T, U]) Optional() *optionalSchema[U] {
+	return Optional(s)
+}
+
+func (s *aggregationSchema) Optional() *optionalSchema[any] {
 	return Optional(s)
 }
 

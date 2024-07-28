@@ -1,31 +1,31 @@
 package zog
 
+import "reflect"
+
 type pipeSchema[T any, U any] struct {
-	checks         []func(U) error
-	schema         SchemaDefinition[T]
-	transformation func(T, error) (U, error)
+	checks []func(U) error
+	first  SchemaDefinition[T]
+	second SchemaDefinition[U]
 }
 
-// Pipe creates a new SchemaDefinition that applies a transformation to the parsed data.
-// Can be used to transform the data into a different type or capture errors.
-// Pipe is used instead of something like .Transform() as chaining generic methods is not possible since
-// methods in Go don't support generics.
-func Pipe[T any, U any](schema SchemaDefinition[T], transformation func(T, error) (U, error)) *pipeSchema[T, U] {
-	return &pipeSchema[T, U]{
-		schema:         schema,
-		transformation: transformation,
-	}
+// Pipe one schema to another.
+// This method supports piping only two schemas to keep the type system simple.
+func Pipe[T any, U any](first SchemaDefinition[T], second SchemaDefinition[U]) *pipeSchema[T, U] {
+	return &pipeSchema[T, U]{first: first, second: second}
 }
 
-func (s *pipeSchema[T, U]) Parse(data any) (U, error) {
-	parsed, err := s.schema.Parse(data)
-
-	// In all cases convert the data and error to the output type, even if we have an error.
-	transformed, err := s.transformation(parsed, err)
-
+func (p *pipeSchema[T, U]) Parse(data any) (U, error) {
+	first, err := p.first.Parse(data)
 	if err != nil {
-		return transformed, err
+		// get an instance of the type U for the type checker
+		u := reflect.New(reflect.TypeOf(*new(U))).Elem().Interface().(U)
+		return u, err
 	}
 
-	return transformed, check(transformed, s.checks)
+	second, err := p.second.Parse(first)
+	if err != nil {
+		return second, err
+	}
+
+	return second, check(second, p.checks)
 }

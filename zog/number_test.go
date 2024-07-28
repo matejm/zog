@@ -7,11 +7,11 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type IntTestSuite struct {
+type NumberTestSuite struct {
 	suite.Suite
 }
 
-func (t *IntTestSuite) TestInvalidType() {
+func (t *NumberTestSuite) TestInvalidType() {
 	schema := zog.Int()
 
 	_, err := schema.Parse("1")
@@ -20,9 +20,16 @@ func (t *IntTestSuite) TestInvalidType() {
 	t.Error(err)
 	_, err = schema.Parse([]byte("1"))
 	t.Error(err)
+
+	schema2 := zog.Float()
+
+	_, err = schema2.Parse("1.0")
+	t.Error(err)
+	_, err = schema2.Parse([]byte("1.0"))
+	t.Error(err)
 }
 
-func (t *IntTestSuite) TestValid() {
+func (t *NumberTestSuite) TestValid() {
 	schema := zog.Int()
 
 	v, err := schema.Parse(1)
@@ -37,9 +44,24 @@ func (t *IntTestSuite) TestValid() {
 	v, err = schema.Parse(a)
 	t.Equal(432, v)
 	t.Nil(err)
+
+	schema2 := zog.Float()
+
+	v2, err := schema2.Parse(1.2)
+	t.Equal(1.2, v2)
+	t.Nil(err)
+
+	v2, err = schema2.Parse(-2132.6)
+	t.Equal(-2132.6, v2)
+	t.Nil(err)
+
+	var a2 any = 432.0
+	v2, err = schema2.Parse(a2)
+	t.Equal(432.0, v2)
+	t.Nil(err)
 }
 
-func (t *IntTestSuite) TestComparison() {
+func (t *NumberTestSuite) TestComparison() {
 	// gt and lt
 	schema := zog.Int().Gt(50).Lt(100)
 
@@ -83,7 +105,7 @@ func (t *IntTestSuite) TestComparison() {
 	t.Error(err)
 }
 
-func (t *IntTestSuite) TestSign() {
+func (t *NumberTestSuite) TestSign() {
 	schema := zog.Int().Positive()
 
 	v, err := schema.Parse(1)
@@ -109,6 +131,6 @@ func (t *IntTestSuite) TestSign() {
 	t.Error(err)
 }
 
-func TestIntSuite(t *testing.T) {
-	suite.Run(t, new(IntTestSuite))
+func TestNumberSuite(t *testing.T) {
+	suite.Run(t, new(NumberTestSuite))
 }

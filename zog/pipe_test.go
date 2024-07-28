@@ -14,52 +14,44 @@ type PipeTestSuite struct {
 
 func (t *PipeTestSuite) TestBasic() {
 	schemaBool := zog.Pipe(
-		zog.Bool(),
-		func(b bool, err error) (bool, error) {
-			return !b, err
-		},
+		zog.Bool().True(),
+		zog.OneOf(true),
 	)
 
 	v, err := schemaBool.Parse(true)
-	t.Equal(false, v)
-	t.Nil(err)
-
-	v, err = schemaBool.Parse(false)
 	t.Equal(true, v)
 	t.Nil(err)
 
-	schemaIgnoreError := zog.Pipe(
-		zog.String().NonEmpty(),
-		func(s string, err error) (string, error) {
-			return s + "!", nil
-		},
-	)
-
-	v2, err := schemaIgnoreError.Parse("")
-	t.Equal("!", v2)
-	t.Nil(err)
+	_, err = schemaBool.Parse(false)
+	t.Error(err)
 }
 
-func (t *PipeTestSuite) TestNested() {
-	schema :=
-		zog.Pipe(
-			zog.Pipe(
-				zog.String(),
-				func(s string, err error) (int, error) {
-					return len(s), err
-				},
-			),
-			func(i int, err error) (string, error) {
-				return strconv.Itoa(i), err
+func (t *PipeTestSuite) TestPracticalUsage() {
+	schema := zog.Pipe(
+		zog.Transform(
+			zog.String().NonEmpty(),
+			func(s string, err error) (int, error) {
+				if err != nil {
+					return 0, err
+				}
+				return strconv.Atoi(s)
 			},
-		)
+		),
+		zog.Int().Gte(0),
+	)
 
-	v, err := schema.Parse("")
-	t.Equal("0", v)
+	v, err := schema.Parse("0")
+	t.Equal(0, v)
 	t.Nil(err)
 
-	v, err = schema.Parse("a")
-	t.Equal("1", v)
+	_, err = schema.Parse("-1")
+	t.Error(err)
+
+	_, err = schema.Parse("")
+	t.Error(err)
+
+	v, err = schema.Parse("12312312")
+	t.Equal(12312312, v)
 	t.Nil(err)
 }
 

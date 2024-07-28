@@ -24,6 +24,10 @@ var usersSchema = zog.Map().Fields(map[string]any{
 		"read", "write", "admin",
 	)).NonEmpty(),
 	"PhoneNumber": zog.String().Regex("^[0-9]{10}$").Max(10).Optional(),
+	"Address": zog.MatchAny(
+		zog.String().NonEmpty(),
+		zog.Array(zog.String().NonEmpty()).NonEmpty(),
+	),
 })
 ```
 
@@ -32,25 +36,25 @@ var usersSchema = zog.Map().Fields(map[string]any{
 Go typing system is not nearly as capable as TypeScript, so Zog is unable to match the Zod's type inference. However, type inference is still present for all the built-in types such as `string`, `int`, `bool`, maps and arrays of any type.
 
 ```go
-var matrixSchema = zog.Array(zog.Array(zog.Int()))
+var matrixSchema = zog.Array(zog.Array(zog.Float()))
 
 var unknownType any = []any{[]any{1, 2, 3}, []any{4, 5, 6}}
 matrix, err := matrixSchema.Parse(unknownType)
-// matrix type is inferred to be [][]int
+// matrix type is inferred to be [][]float64
 
 var optionalSchema = zog.String().NonEmpty().Optional()
 
 value, err := optionalSchema.Parse("John")
 // value type is inferred to be *string
 
-var pipedSchema = zog.Pipe(
+var transformedSchema = zog.Transform(
 	zog.String().NonEmpty(),
 	func (s string, err error) (int, error) {
 		return len(s), nil
 	},
 )
 
-value, err := pipedSchema.Parse("John")
+value, err := transformedSchema.Parse("John")
 // value type is inferred to be int
 ```
 
@@ -99,7 +103,7 @@ user, err := schema.Parse(map[string]any{
 
 ## Future plans
 
-- Add more useful types (e.g. float, date, pipe one schema to another, ...)
+- Add more useful types (e.g. date, cast, ...)
 - Add more validations (e.g. email, url)
 - Check if it is possible to infer more types from the schema
 - Add code generation for custom types (if it is possible to infer the type from the schema)

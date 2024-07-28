@@ -7,7 +7,7 @@ func (s *boolSchema) Check(check func(bool) error) *boolSchema {
 	return s
 }
 
-func (s *intSchema) Check(check func(int) error) *intSchema {
+func (s *numberSchema[T]) Check(check func(T) error) *numberSchema[T] {
 	s.checks = append(s.checks, check)
 	return s
 }
@@ -32,12 +32,22 @@ func (s *optionalSchema[T]) Check(check func(*T) error) *optionalSchema[T] {
 	return s
 }
 
-func (s *pipeSchema[T, U]) Check(check func(U) error) *pipeSchema[T, U] {
+func (s *transformSchema[T, U]) Check(check func(U) error) *transformSchema[T, U] {
 	s.checks = append(s.checks, check)
 	return s
 }
 
 func (s *oneOfSchema[T]) Check(check func(T) error) *oneOfSchema[T] {
+	s.checks = append(s.checks, check)
+	return s
+}
+
+func (s *pipeSchema[T, U]) Check(check func(U) error) *pipeSchema[T, U] {
+	s.checks = append(s.checks, check)
+	return s
+}
+
+func (s *aggregationSchema) Check(check func(any) error) *aggregationSchema {
 	s.checks = append(s.checks, check)
 	return s
 }

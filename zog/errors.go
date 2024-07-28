@@ -76,3 +76,13 @@ func ErrMissingField(field string) error {
 func ErrNoOneOf(got any) error {
 	return fmt.Errorf("no oneOf matched, got %v", got)
 }
+
+// aggregation errors
+
+func ErrNotEvenOneMatch(nOfOptions int) error {
+	return fmt.Errorf("none of the %d options matched", nOfOptions)
+}
+
+func ErrNotAllMatch(index int, err error) error {
+	return fmt.Errorf("one of the options did not match, index %d: %w", index, err)
+}
