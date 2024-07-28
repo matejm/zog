@@ -1,6 +1,10 @@
 package zog
 
-import "golang.org/x/exp/constraints"
+import (
+	"reflect"
+
+	"golang.org/x/exp/constraints"
+)
 
 type numberSchema[T constraints.Integer | constraints.Float] struct {
 	checks []func(T) error
@@ -15,9 +19,24 @@ func Float() *numberSchema[float64] {
 }
 
 func (s *numberSchema[T]) Parse(data any) (T, error) {
+	// cast if we can (simple .(T) is not enough as we can get json data which are always float64)
+	vType := reflect.TypeOf(data)
+	requestedType := reflect.TypeOf(T(0))
+
+	if vType != requestedType {
+		// check if we can convert
+		if !vType.ConvertibleTo(requestedType) {
+			return 0, ErrInvalidType(data, requestedType.String())
+		}
+
+		// cast
+		data = reflect.ValueOf(data).Convert(requestedType).Interface()
+	}
+
+	// now we can safely cast to T
 	v, ok := data.(T)
 	if !ok {
-		return 0, ErrInvalidType(data, "int")
+		return 0, ErrInvalidType(data, requestedType.String())
 	}
 
 	return v, check(v, s.checks)

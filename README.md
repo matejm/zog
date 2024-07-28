@@ -17,7 +17,7 @@ value, err := schema.Parse("John")
 More complex schema example:
 
 ```go
-var usersSchema = zog.Map().Fields(map[string]any{
+var userSchema = zog.Map().Fields(map[string]any{
 	"Name": zog.String().NonEmpty(),
 	"Age":  zog.Int().Gte(0).Lte(100),
 	"Permissions": zog.Array(zog.OneOf(
@@ -29,6 +29,23 @@ var usersSchema = zog.Map().Fields(map[string]any{
 		zog.Array(zog.String().NonEmpty()).NonEmpty(),
 	),
 })
+```
+
+## Parsing JSON
+
+Zog can parse JSON into any type defined by the schema.
+
+```go
+data := `{
+  "Name": "John",
+  "Age": 18,
+  "Permissions": ["read", "write", "admin"],
+  "PhoneNumber": "1234567890",
+  "Address": ["123 Main St", "Anytown, USA"]
+}`
+
+user, err := userSchema.ParseJSON(data)
+// user was validated and parsed
 ```
 
 ## Type inference

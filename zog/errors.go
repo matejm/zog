@@ -16,6 +16,10 @@ func ErrExact[T any](got, exact T) error {
 	return fmt.Errorf("expected %v, got %v", exact, got)
 }
 
+func ErrInvalidJSON(err error) error {
+	return fmt.Errorf("invalid JSON: %w", err)
+}
+
 // string errors (some also used for arrays)
 
 func ErrTooShort(got, min int) error {

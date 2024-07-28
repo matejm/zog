@@ -16,8 +16,6 @@ func (t *NumberTestSuite) TestInvalidType() {
 
 	_, err := schema.Parse("1")
 	t.Error(err)
-	_, err = schema.Parse(1.0)
-	t.Error(err)
 	_, err = schema.Parse([]byte("1"))
 	t.Error(err)
 
@@ -43,6 +41,11 @@ func (t *NumberTestSuite) TestValid() {
 	var a any = 432
 	v, err = schema.Parse(a)
 	t.Equal(432, v)
+	t.Nil(err)
+
+	// float gets cast to int
+	v, err = schema.Parse(1.3)
+	t.Equal(1, v)
 	t.Nil(err)
 
 	schema2 := zog.Float()
