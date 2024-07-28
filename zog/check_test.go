@@ -110,6 +110,27 @@ func (t *CheckTestSuite) TestOptional() {
 	t.Error(err)
 }
 
+func (t *CheckTestSuite) TestPipe() {
+	schema := zog.Pipe(
+		zog.String(),
+		func(s string, err error) (string, error) {
+			return s + "!", err
+		},
+	).Check(func(v string) error {
+		if v == "!" {
+			return nil
+		}
+		return errors.New("invalid")
+	})
+
+	v, err := schema.Parse("")
+	t.Equal("!", v)
+	t.Nil(err)
+
+	_, err = schema.Parse("a")
+	t.Error(err)
+}
+
 func TestCheckSuite(t *testing.T) {
 	suite.Run(t, new(CheckTestSuite))
 }

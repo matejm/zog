@@ -44,6 +44,10 @@ func (s *arraySchema[T]) Optional() *optionalSchema[[]T] {
 	return Optional(s)
 }
 
+func (s *pipeSchema[T, U]) Optional() *optionalSchema[U] {
+	return Optional(s)
+}
+
 func (s *optionalSchema[T]) Parse(data any) (*T, error) {
 	if data == nil {
 		return nil, nil

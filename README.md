@@ -33,7 +33,6 @@ Go typing system is not nearly as capable as TypeScript, so Zog is unable to mat
 var matrixSchema = zog.Array(zog.Array(zog.Int()))
 
 var unknownType any = []any{[]any{1, 2, 3}, []any{4, 5, 6}}
-
 matrix, err := matrixSchema.Parse(unknownType)
 // matrix type is inferred to be [][]int
 
@@ -41,6 +40,16 @@ var optionalSchema = zog.String().NonEmpty().Optional()
 
 value, err := optionalSchema.Parse("John")
 // value type is inferred to be *string
+
+var pipedSchema = zog.Pipe(
+	zog.String().NonEmpty(),
+	func (s string, err error) (int, error) {
+		return len(s), nil
+	},
+)
+
+value, err := pipedSchema.Parse("John")
+// value type is inferred to be int
 ```
 
 In case of object schemas, Zog currently provides two options. You can either use `map[string]any` or types defined by your own structs. In the future, we might add support for code generation to automatically create structs from the schema.

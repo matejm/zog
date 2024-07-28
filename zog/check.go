@@ -31,3 +31,8 @@ func (s *optionalSchema[T]) Check(check func(*T) error) *optionalSchema[T] {
 	s.checks = append(s.checks, check)
 	return s
 }
+
+func (s *pipeSchema[T, U]) Check(check func(U) error) *pipeSchema[T, U] {
+	s.checks = append(s.checks, check)
+	return s
+}
